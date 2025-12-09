@@ -1,32 +1,35 @@
-📝 To-Do List Full Stack Application
-Una aplicación completa de lista de tareas con frontend, backend y base de datos, desplegada en la nube.
+---
 
-✨ Características
-✅ Frontend elegante basado en diseño de CodePen
+# 📝 To-Do List — Full Stack Application
 
-🔄 Backend RESTful API con Node.js y Express
+Una aplicación completa de lista de tareas con **frontend**, **backend** y **base de datos**, desplegada en la nube con las mejores prácticas.
 
-🗄️ Base de datos PostgreSQL para almacenamiento persistente
+---
 
-📱 Totalmente responsivo (mobile-first design)
+## ✨ Características
 
-🌐 Despliegue en la nube (Netlify + Render + Railway)
+* ✅ **Frontend elegante** inspirado en diseño de CodePen
+* 🔄 **Backend RESTful API** con Node.js + Express
+* 🗄️ **Base de datos PostgreSQL** (almacenamiento persistente)
+* 📱 **Responsive (mobile-first)**
+* 🌐 **Despliegue en Netlify + Render + Railway**
+* 💾 **Fallback a LocalStorage** si el backend no responde
+* 🎨 **Interfaz moderna**, animaciones suaves
+* 🔍 **Filtros de tareas** (Todas / Pendientes / Completadas)
+* 📊 **Estadísticas en tiempo real**
+* ✏️ **Edición inline** de tareas
 
-💾 Fallback a almacenamiento local si el backend está offline
+---
 
-🎨 Interfaz moderna con animaciones y efectos
+## 🚀 Demo en Vivo
 
-🔍 Filtrado de tareas (Todas / Pendientes / Completadas)
+🔗 **Repositorio:** [https://github.com/Sam-Chispas/todo_list_fullstack](https://github.com/Sam-Chispas/todo_list_fullstack)
 
-📊 Estadísticas en tiempo real de tareas
+---
 
-✏️ Edición en línea de tareas
+## 🏗️ Arquitectura
 
-🚀 Demo en Vivo
-Repositorio: https://github.com/Sam-Chispas/todo_list_fullstack
-
-🏗️ Arquitectura
-text
+```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │    Netlify      │────▶│     Render      │────▶│    Railway      │
 │   (Frontend)    │     │    (Backend)    │     │   (Database)    │
@@ -34,251 +37,282 @@ text
 └─────────────────┘     └─────────────────┘     └─────────────────┘
         │                       │                       │
         └───────────────────────┴───────────────────────┘
-                          API REST
-📁 Estructura del Proyecto
-text
+                           API REST
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
 todo_list_fullstack/
-├── frontend/                    # Interfaz de usuario
-│   ├── index.html              # HTML principal
-│   ├── styles.css              # Estilos CSS
-│   └── app.js                  # Lógica JavaScript
+├── frontend/                    
+│   ├── index.html           
+│   ├── styles.css           
+│   └── app.js               
 │
-├── backend/                    # Servidor API
-│   ├── server.js              # Servidor Express
-│   ├── package.json           # Dependencias Node.js
-│   ├── .env                   # Variables de entorno ejemplo
-│   └── start.sh               # Script de inicio
+├── backend/                    
+│   ├── server.js           
+│   ├── package.json       
+│   ├── .env.example        
+│   └── start.sh            
 │
-├── database/                   # Configuración DB
-│   └── init.sql               # Scripts SQL iniciales
+├── database/                  
+│   └── init.sql             
 │
-├── netlify.toml               # Configuración Netlify
-├── .gitignore                 # Archivos ignorados por Git
-└── README.md                  # Este archivo
-🛠️ Tecnologías Utilizadas
-Frontend
-HTML5 - Estructura semántica
+├── netlify.toml              
+├── .gitignore               
+└── README.md                
+```
 
-CSS3 - Estilos con Flexbox/Grid, animaciones
+---
 
-JavaScript (ES6+) - Lógica de la aplicación
+## 🛠️ Tecnologías Utilizadas
 
-Font Awesome - Iconos
+### 🖥️ **Frontend**
 
-Google Fonts - Tipografía Poppins
+* HTML5
+* CSS3 (Flexbox, Grid, Animaciones)
+* JavaScript (ES6+)
+* Font Awesome
+* Google Fonts (Poppins)
 
-Backend
-Node.js - Entorno de ejecución
+### 🧠 **Backend**
 
-Express.js - Framework web
+* Node.js
+* Express.js
+* PostgreSQL
+* CORS
+* dotenv
 
-PostgreSQL - Base de datos relacional
+### ☁️ **Infraestructura**
 
-CORS - Middleware para Cross-Origin
+* Netlify → Frontend
+* Render → Backend
+* Railway → PostgreSQL
+* GitHub → Control de versiones
 
-dotenv - Gestión de variables de entorno
+---
 
-Infraestructura
-Netlify - Hosting frontend estático
+## 🚀 Despliegue Rápido
 
-Render - Hosting backend Node.js
+### 🔧 Prerrequisitos
 
-Railway - Base de datos PostgreSQL
+* Git
+* Node.js 16+
+* Cuentas en Netlify, Render y Railway
 
-GitHub - Control de versiones
+---
 
-🚀 Despliegue Rápido
-Prerrequisitos
-Git
+### **📌 Paso 1: Clonar Repositorio**
 
-Node.js (v16+)
-
-GitHub Account
-
-Cuentas en Netlify, Render, Railway
-
-Paso 1: Clonar el Repositorio
-bash
+```bash
 git clone https://github.com/Sam-Chispas/todo_list_fullstack.git
 cd todo_list_fullstack
-Paso 2: Desplegar Base de Datos (Railway)
-Crear cuenta en Railway
+```
 
-Crear nuevo proyecto → "Database" → "PostgreSQL"
+---
 
-Copiar la DATABASE_URL generada automáticamente
+### **🐘 Paso 2: Base de Datos (Railway)**
 
-Paso 3: Desplegar Backend (Render)
-Crear cuenta en Render
+1. Crear cuenta en Railway
+2. Crear proyecto → Database → PostgreSQL
+3. Copiar tu `DATABASE_URL`
 
-"New +" → "Web Service" → Conectar repositorio GitHub
+---
 
-Configurar:
+### **🛠️ Paso 3: Backend (Render)**
 
-Name: todo-backend
+1. Crear cuenta
+2. New → Web Service → Importar desde GitHub
+3. Configurar:
 
-Environment: Node
+| Campo             | Valor                          |
+| ----------------- | ------------------------------ |
+| **Name**          | `todo-backend`                 |
+| **Environment**   | Node                           |
+| **Build Command** | `cd backend && npm install`    |
+| **Start Command** | `cd backend && node server.js` |
 
-Build Command: cd backend && npm install
+4. Añadir variables de entorno:
 
-Start Command: cd backend && node server.js
+```
+NODE_ENV=production
+DATABASE_URL=tu_url_de_railway
+```
 
-Añadir variables de entorno:
+5. Deploy
+6. Guardar URL del backend
 
-NODE_ENV = production
+---
 
-DATABASE_URL = (URL de Railway)
+### **🌐 Paso 4: Frontend (Netlify)**
 
-Deploy y copiar la URL del backend (ej: https://todo-backend.onrender.com)
+1. Importar proyecto desde GitHub
+2. Configuración:
 
-Paso 4: Desplegar Frontend (Netlify)
-Crear cuenta en Netlify
+| Campo                 | Valor      |
+| --------------------- | ---------- |
+| **Build command**     | *(vacío)*  |
+| **Publish directory** | `frontend` |
 
-"Add new site" → "Import an existing project" → GitHub
+3. Variables de entorno:
 
-Seleccionar repositorio
+```
+API_URL = https://tu-backend.onrender.com
+```
 
-Configurar:
+---
 
-Build command: (dejar vacío)
+### **🎯 Paso 5 (Opcional): Proxy en Netlify**
 
-Publish directory: frontend
+Archivo: `/frontend/_redirects`
 
-En "Site settings" → "Environment variables":
-
-API_URL = (URL de tu backend en Render)
-
-Deploy
-
-Paso 5: Configurar Proxy (Opcional)
-Para evitar problemas CORS, añadir en Netlify _redirects:
-
-text
+```
 /api/* https://tu-backend.onrender.com/api/:splat 200
-💻 Desarrollo Local
-1. Configurar entorno
-bash
-# Clonar repositorio
-git clone https://github.com/Sam-Chispas/todo_list_fullstack.git
-cd todo_list_fullstack/backend
+```
 
-# Instalar dependencias
+---
+
+## 💻 Desarrollo Local
+
+### **1. Instalar dependencias**
+
+```bash
+cd backend
 npm install
-
-# Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus credenciales
-2. Base de datos local (Opciones)
-Opción A: PostgreSQL local
-bash
-# Instalar PostgreSQL
-# Crear base de datos
-createdb todo_db
+```
 
-# Ejecutar script inicial
+Editar `.env` con tus datos.
+
+---
+
+### **2. Base de datos local**
+
+#### Opción A — PostgreSQL
+
+```bash
+createdb todo_db
 psql -d todo_db -f database/init.sql
-Opción B: SQLite (más simple)
-bash
-# Modificar backend/server.js para usar SQLite
-# npm install sqlite3
-3. Ejecutar aplicación
-bash
-# Iniciar backend
+```
+
+#### Opción B — SQLite (simple)
+
+```bash
+npm install sqlite3
+```
+
+*(Modificar server.js)*
+
+---
+
+### **3. Ejecutar App**
+
+```bash
+# Backend
 cd backend
 npm run dev
-# Servidor en: http://localhost:3000
 
-# Iniciar frontend
-# Abrir frontend/index.html en navegador
-# O usar live-server: npx live-server frontend
-🔧 Configuración de Variables de Entorno
-Backend (.env)
-env
+# Frontend
+npx live-server frontend
+```
+
+---
+
+## 🔧 Variables de Entorno
+
+### **Backend (.env)**
+
+```
 PORT=3000
 NODE_ENV=development
-DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/todo_db
-Frontend (app.js)
-javascript
-// Configurar URL del backend
-this.apiUrl = process.env.NODE_ENV === 'production' 
+DATABASE_URL=postgresql://usuario:password@localhost:5432/todo_db
+```
+
+### **Frontend (app.js)**
+
+```javascript
+this.apiUrl = process.env.NODE_ENV === 'production'
   ? 'https://tu-backend.onrender.com/api/todos'
   : 'http://localhost:3000/api/todos';
-📚 API Endpoints
-Método	Endpoint	Descripción
-GET	/api/todos	Obtener todas las tareas
-POST	/api/todos	Crear nueva tarea
-PATCH	/api/todos/:id	Actualizar tarea
-DELETE	/api/todos/:id	Eliminar tarea
-DELETE	/api/todos/clear-completed	Eliminar completadas
-Ejemplo de Tarea
-json
+```
+
+---
+
+## 📚 API Endpoints
+
+| Método | Endpoint                     | Descripción        |
+| ------ | ---------------------------- | ------------------ |
+| GET    | `/api/todos`                 | Obtener tareas     |
+| POST   | `/api/todos`                 | Crear tarea        |
+| PATCH  | `/api/todos/:id`             | Actualizar tarea   |
+| DELETE | `/api/todos/:id`             | Eliminar tarea     |
+| DELETE | `/api/todos/clear-completed` | Borrar completadas |
+
+### **Ejemplo**
+
+```json
 {
   "id": 1,
   "text": "Aprender Full Stack",
   "completed": false,
   "created_at": "2024-01-01T10:00:00.000Z"
 }
-🐛 Solución de Problemas Comunes
-Error: "Backend no disponible"
-Verificar que Render esté ejecutándose
+```
 
-Revisar logs en Render dashboard
+---
 
-Verificar variables de entorno
+## 🐛 Problemas Comunes
 
-Error: "No se puede conectar a la base de datos"
-Verificar DATABASE_URL en Render
+### ❌ Backend no disponible
 
-Comprobar que Railway DB esté activa
+* Revisar logs de Render
+* Verificar variables de entorno
+* Railway puede hibernar en plan gratuito
 
-Revisar logs de Railway
+### ❌ No conecta a DB
 
-Error CORS en desarrollo
-javascript
-// En backend/server.js
+* Verificar `DATABASE_URL`
+* Confirmar que Railway esté "awake"
+
+### ❌ CORS en local
+
+```js
 app.use(cors({
   origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],
   credentials: true
 }));
-Límites de las plataformas gratuitas
-Render: 750 horas/mes gratis
+```
 
-Railway: $5 crédito mensual
+---
 
-Netlify: 100GB/mes ancho de banda
+## 🔄 Flujo de Trabajo con Git
 
-🔄 Flujo de Trabajo con Git
-bash
-# Clonar proyecto
+```bash
 git clone https://github.com/Sam-Chispas/todo_list_fullstack.git
-
-# Crear rama para nueva funcionalidad
 git checkout -b feature/nueva-funcionalidad
-
-# Hacer cambios y commit
 git add .
 git commit -m "Descripción de cambios"
-
-# Subir a GitHub
 git push origin feature/nueva-funcionalidad
+```
 
-# Crear Pull Request en GitHub
-🤝 Contribuir
-Fork el repositorio
+---
 
-Crear rama de feature (git checkout -b feature/AmazingFeature)
+## 🤝 Contribuciones
 
-Commit cambios (git commit -m 'Add AmazingFeature')
+1. Hacer **Fork**
+2. Crear rama
+3. Subir cambios
+4. Abrir Pull Request
 
-Push a la rama (git push origin feature/AmazingFeature)
+---
 
-Abrir Pull Request
+## 👏 Créditos
 
-👏 Agradecimientos
-Diseño frontend inspirado en CodePen de shshaw
+* Diseño inspirado en CodePen de **shshaw**
+* Iconos: **Font Awesome**
+* Fuentes: **Google Fonts**
+* Hosting: **Netlify, Render, Railway**
 
-Iconos por Font Awesome
-
-Fuentes por Google Fonts
-
-Hosting por Netlify, Render, Railway
+---
