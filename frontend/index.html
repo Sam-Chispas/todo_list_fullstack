@@ -17,6 +17,15 @@
 
         <main>
             <div class="todo-wrapper">
+                <!-- Mensaje de advertencia (se mostrará si backend offline) -->
+                <div id="backend-warning" class="backend-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Modo offline:</strong> No se pudo conectar al servidor. 
+                        Las tareas se guardarán localmente.
+                    </div>
+                </div>
+
                 <div class="todo-input-section">
                     <input type="text" 
                            id="new-todo" 
@@ -64,8 +73,11 @@
         <footer>
             <p>To-Do List Full Stack | Backend: 
                 <span id="backend-status" class="status-offline">
-                    <i class="fas fa-circle"></i> Desconectado
+                    <i class="fas fa-circle"></i> Verificando...
                 </span>
+            </p>
+            <p class="footer-info">
+                <small>Frontend: Netlify | Backend: Render | Base de datos: Railway</small>
             </p>
         </footer>
     </div>

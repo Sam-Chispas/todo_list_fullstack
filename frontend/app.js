@@ -1,12 +1,8 @@
 class TodoApp {
     constructor() {
-        // URL del backend en Render (la obtendrás después)
-        this.apiUrl = 'https://todo-list-fullstack-1l3f.onrender.com';
-        
-        // Fallback para desarrollo local
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            this.apiUrl = 'http://localhost:3000/api/todos';
-        }
+        // URL de tu backend en Render
+        this.BACKEND_URL = 'https://todo-list-fullstack-1l3f.onrender.com';
+        this.API_URL = `${this.BACKEND_URL}/api/todos`;
         
         this.currentFilter = 'all';
         this.editingTodoId = null;
@@ -30,6 +26,7 @@ class TodoApp {
         this.cancelEditButton = document.getElementById('cancel-edit');
         this.saveEditButton = document.getElementById('save-edit');
         this.backendStatus = document.getElementById('backend-status');
+        this.backendWarning = document.getElementById('backend-warning');
     }
     
     setupEventListeners() {
@@ -50,14 +47,12 @@ class TodoApp {
         this.cancelEditButton.addEventListener('click', () => this.closeEditModal());
         this.saveEditButton.addEventListener('click', () => this.saveEdit());
         
-        // Cerrar modal al hacer clic fuera de él
         this.editModal.addEventListener('click', (e) => {
             if (e.target === this.editModal) {
                 this.closeEditModal();
             }
         });
         
-        // Cerrar modal con la tecla Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.editModal.style.display === 'flex') {
                 this.closeEditModal();
@@ -66,39 +61,104 @@ class TodoApp {
     }
     
     async checkBackendConnection() {
+        console.log('🔍 Verificando conexión al backend...');
+        console.log('URL:', this.BACKEND_URL);
+        
         try {
-            const response = await fetch(this.apiUrl.replace('/api/todos', '/health'));
+            // Intentar conectar al endpoint de salud
+            const response = await fetch(`${this.BACKEND_URL}/health`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
             if (response.ok) {
                 const data = await response.json();
-                this.backendStatus.innerHTML = `<i class="fas fa-circle"></i> ${data.status || 'Conectado'}`;
-                this.backendStatus.className = 'status-online';
+                console.log('✅ Backend conectado:', data);
+                
+                this.updateBackendStatus('connected', 'Conectado');
+                this.hideWarning();
+                return true;
             } else {
-                throw new Error('Backend no disponible');
+                throw new Error(`HTTP ${response.status}`);
             }
         } catch (error) {
-            console.warn('No se pudo conectar al backend:', error);
-            this.backendStatus.innerHTML = '<i class="fas fa-circle"></i> Desconectado';
-            this.backendStatus.className = 'status-offline';
+            console.warn('⚠️ No se pudo conectar al backend:', error.message);
             
-            // Mostrar alerta amigable
-            if (!localStorage.getItem('backendWarningShown')) {
-                alert('⚠️ El backend está temporalmente fuera de línea. Las tareas se guardarán localmente hasta que se restablezca la conexión.');
-                localStorage.setItem('backendWarningShown', 'true');
+            // Intentar conexión directa a la API
+            try {
+                const apiResponse = await fetch(this.API_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (apiResponse.ok) {
+                    this.updateBackendStatus('connected', 'Conectado (API)');
+                    this.hideWarning();
+                    return true;
+                }
+            } catch (apiError) {
+                console.warn('⚠️ Conexión a API también falló:', apiError.message);
             }
+            
+            this.updateBackendStatus('disconnected', 'Modo offline');
+            this.showWarning();
+            return false;
         }
     }
+    
+    updateBackendStatus(status, text) {
+        this.backendStatus.innerHTML = `<i class="fas fa-circle"></i> ${text}`;
+        
+        if (status === 'connected') {
+            this.backendStatus.className = 'status-online';
+        } else if (status === 'warning') {
+            this.backendStatus.className = 'status-warning';
+        } else {
+            this.backendStatus.className = 'status-offline';
+        }
+    }
+    
+    showWarning() {
+        if (this.backendWarning) {
+            this.backendWarning.style.display = 'flex';
+        }
+    }
+    
+    hideWarning() {
+        if (this.backendWarning) {
+            this.backendWarning.style.display = 'none';
+        }
+    }
+    
     async loadTodos() {
+        console.log('📥 Cargando tareas...');
+        
         try {
-            const response = await fetch(this.apiUrl);
-            if (!response.ok) throw new Error('Error al cargar tareas');
+            const response = await fetch(this.API_URL, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
             
-            const todos = await response.json();
-            this.renderTodos(todos);
-            this.updateStats(todos);
+            if (response.ok) {
+                const todos = await response.json();
+                console.log(`✅ ${todos.length} tareas cargadas del backend`);
+                this.renderTodos(todos);
+                this.updateStats(todos);
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al cargar tareas:', error);
-            // Cargar datos locales si el backend no está disponible
+            console.warn('⚠️ No se pudieron cargar tareas del backend:', error.message);
+            
+            // Cargar desde localStorage
             const localTodos = this.getLocalTodos();
+            console.log(`📱 ${localTodos.length} tareas cargadas de localStorage`);
             this.renderTodos(localTodos);
             this.updateStats(localTodos);
         }
@@ -114,25 +174,31 @@ class TodoApp {
             createdAt: new Date().toISOString()
         };
         
+        console.log('➕ Agregando tarea:', text);
+        
         try {
-            const response = await fetch(this.apiUrl, {
+            const response = await fetch(this.API_URL, {
                 method: 'POST',
+                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(todo)
             });
             
-            if (!response.ok) throw new Error('Error al agregar tarea');
-            
-            const newTodo = await response.json();
-            this.appendTodo(newTodo);
-            this.newTodoInput.value = '';
-            this.updateStatsAfterChange();
-            
+            if (response.ok) {
+                const newTodo = await response.json();
+                console.log('✅ Tarea guardada en backend:', newTodo);
+                this.appendTodo(newTodo);
+                this.newTodoInput.value = '';
+                this.updateStatsAfterChange();
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al agregar tarea:', error);
-            // Guardar localmente si el backend falla
+            console.warn('⚠️ No se pudo guardar en backend, guardando localmente:', error.message);
+            
+            // Guardar localmente
             todo.id = Date.now().toString();
             this.saveTodoLocal(todo);
             this.appendTodo(todo);
@@ -142,41 +208,53 @@ class TodoApp {
     }
     
     async toggleTodo(id, completed) {
+        console.log(`🔄 Marcando tarea ${id} como ${completed ? 'completada' : 'pendiente'}`);
+        
         try {
-            const response = await fetch(`${this.apiUrl}/${id}`, {
+            const response = await fetch(`${this.API_URL}/${id}`, {
                 method: 'PATCH',
+                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ completed })
             });
             
-            if (!response.ok) throw new Error('Error al actualizar tarea');
-            
-            this.updateStatsAfterChange();
-            
+            if (response.ok) {
+                console.log('✅ Tarea actualizada en backend');
+                this.updateStatsAfterChange();
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al actualizar tarea:', error);
-            // Actualizar localmente si el backend falla
+            console.warn('⚠️ No se pudo actualizar en backend, actualizando localmente:', error.message);
             this.toggleTodoLocal(id, completed);
             this.updateStatsAfterChange();
         }
     }
     
     async deleteTodo(id) {
+        console.log(`🗑️ Eliminando tarea ${id}`);
+        
+        if (!confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+            return;
+        }
+        
         try {
-            const response = await fetch(`${this.apiUrl}/${id}`, {
-                method: 'DELETE'
+            const response = await fetch(`${this.API_URL}/${id}`, {
+                method: 'DELETE',
+                mode: 'cors'
             });
             
-            if (!response.ok) throw new Error('Error al eliminar tarea');
-            
-            this.removeTodoElement(id);
-            this.updateStatsAfterChange();
-            
+            if (response.ok) {
+                console.log('✅ Tarea eliminada del backend');
+                this.removeTodoElement(id);
+                this.updateStatsAfterChange();
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al eliminar tarea:', error);
-            // Eliminar localmente si el backend falla
+            console.warn('⚠️ No se pudo eliminar del backend, eliminando localmente:', error.message);
             this.deleteTodoLocal(id);
             this.removeTodoElement(id);
             this.updateStatsAfterChange();
@@ -184,23 +262,27 @@ class TodoApp {
     }
     
     async updateTodo(id, text) {
+        console.log(`✏️ Editando tarea ${id}:`, text);
+        
         try {
-            const response = await fetch(`${this.apiUrl}/${id}`, {
+            const response = await fetch(`${this.API_URL}/${id}`, {
                 method: 'PATCH',
+                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ text })
             });
             
-            if (!response.ok) throw new Error('Error al actualizar tarea');
-            
-            this.updateTodoElement(id, text);
-            this.updateStatsAfterChange();
-            
+            if (response.ok) {
+                console.log('✅ Tarea editada en backend');
+                this.updateTodoElement(id, text);
+                this.updateStatsAfterChange();
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al actualizar tarea:', error);
-            // Actualizar localmente si el backend falla
+            console.warn('⚠️ No se pudo editar en backend, editando localmente:', error.message);
             this.updateTodoLocal(id, text);
             this.updateTodoElement(id, text);
             this.updateStatsAfterChange();
@@ -208,20 +290,28 @@ class TodoApp {
     }
     
     async clearCompleted() {
+        console.log('🧹 Limpiando tareas completadas');
+        
+        if (!confirm('¿Estás seguro de que quieres eliminar todas las tareas completadas?')) {
+            return;
+        }
+        
         try {
-            const response = await fetch(`${this.apiUrl}/clear-completed`, {
-                method: 'DELETE'
+            const response = await fetch(`${this.API_URL}/clear-completed`, {
+                method: 'DELETE',
+                mode: 'cors'
             });
             
-            if (!response.ok) throw new Error('Error al limpiar tareas completadas');
-            
-            const remainingTodos = await response.json();
-            this.renderTodos(remainingTodos);
-            this.updateStats(remainingTodos);
-            
+            if (response.ok) {
+                const remainingTodos = await response.json();
+                console.log(`✅ Tareas completadas eliminadas del backend`);
+                this.renderTodos(remainingTodos);
+                this.updateStats(remainingTodos);
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al limpiar tareas completadas:', error);
-            // Limpiar localmente si el backend falla
+            console.warn('⚠️ No se pudo limpiar en backend, limpiando localmente:', error.message);
             this.clearCompletedLocal();
             const localTodos = this.getLocalTodos();
             this.renderTodos(localTodos);
@@ -234,6 +324,7 @@ class TodoApp {
         this.editTodoInput.value = todo.text;
         this.editModal.style.display = 'flex';
         this.editTodoInput.focus();
+        this.editTodoInput.select();
     }
     
     closeEditModal() {
@@ -308,7 +399,6 @@ class TodoApp {
             </div>
         `;
         
-        // Event listeners para los elementos dentro del li
         const checkbox = li.querySelector('.todo-checkbox');
         const editButton = li.querySelector('.btn-edit');
         const deleteButton = li.querySelector('.btn-delete');
@@ -325,12 +415,9 @@ class TodoApp {
         });
         
         deleteButton.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-                this.deleteTodo(todo.id);
-            }
+            this.deleteTodo(todo.id);
         });
         
-        // Doble clic para editar
         todoText.addEventListener('dblclick', () => {
             this.openEditModal(todo);
         });
@@ -343,7 +430,6 @@ class TodoApp {
             this.emptyState.style.display = 'none';
         }
         
-        // Verificar si la tarea debe mostrarse con el filtro actual
         let shouldShow = true;
         if (this.currentFilter === 'active' && todo.completed) {
             shouldShow = false;
@@ -375,14 +461,18 @@ class TodoApp {
     
     async updateStatsAfterChange() {
         try {
-            const response = await fetch(this.apiUrl);
-            if (!response.ok) throw new Error('Error al cargar estadísticas');
+            const response = await fetch(this.API_URL, {
+                method: 'GET',
+                mode: 'cors'
+            });
             
-            const todos = await response.json();
-            this.updateStats(todos);
-            
+            if (response.ok) {
+                const todos = await response.json();
+                this.updateStats(todos);
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
-            console.error('Error al actualizar estadísticas:', error);
             const localTodos = this.getLocalTodos();
             this.updateStats(localTodos);
         }
@@ -391,54 +481,77 @@ class TodoApp {
     updateStats(todos) {
         const activeCount = todos.filter(todo => !todo.completed).length;
         const totalCount = todos.length;
+        const completedCount = totalCount - activeCount;
         
         this.todoCount.textContent = `${activeCount} tarea${activeCount !== 1 ? 's' : ''} pendiente${activeCount !== 1 ? 's' : ''}`;
-        
-        // Mostrar/ocultar botón de limpiar completadas
-        const completedCount = todos.filter(todo => todo.completed).length;
         this.clearCompletedButton.style.display = completedCount > 0 ? 'flex' : 'none';
     }
     
-    // Métodos para almacenamiento local (fallback)
+    // Métodos para localStorage
     getLocalTodos() {
-        const todos = localStorage.getItem('todos');
-        return todos ? JSON.parse(todos) : [];
+        try {
+            const todos = localStorage.getItem('todo_app_tasks');
+            return todos ? JSON.parse(todos) : [];
+        } catch (error) {
+            console.error('Error leyendo localStorage:', error);
+            return [];
+        }
     }
     
     saveTodoLocal(todo) {
-        const todos = this.getLocalTodos();
-        todos.push(todo);
-        localStorage.setItem('todos', JSON.stringify(todos));
+        try {
+            const todos = this.getLocalTodos();
+            todos.push(todo);
+            localStorage.setItem('todo_app_tasks', JSON.stringify(todos));
+        } catch (error) {
+            console.error('Error guardando en localStorage:', error);
+        }
     }
     
     toggleTodoLocal(id, completed) {
-        const todos = this.getLocalTodos();
-        const todoIndex = todos.findIndex(todo => todo.id === id);
-        if (todoIndex !== -1) {
-            todos[todoIndex].completed = completed;
-            localStorage.setItem('todos', JSON.stringify(todos));
+        try {
+            const todos = this.getLocalTodos();
+            const todoIndex = todos.findIndex(todo => todo.id == id);
+            if (todoIndex !== -1) {
+                todos[todoIndex].completed = completed;
+                localStorage.setItem('todo_app_tasks', JSON.stringify(todos));
+            }
+        } catch (error) {
+            console.error('Error actualizando en localStorage:', error);
         }
     }
     
     deleteTodoLocal(id) {
-        let todos = this.getLocalTodos();
-        todos = todos.filter(todo => todo.id !== id);
-        localStorage.setItem('todos', JSON.stringify(todos));
+        try {
+            let todos = this.getLocalTodos();
+            todos = todos.filter(todo => todo.id != id);
+            localStorage.setItem('todo_app_tasks', JSON.stringify(todos));
+        } catch (error) {
+            console.error('Error eliminando de localStorage:', error);
+        }
     }
     
     updateTodoLocal(id, text) {
-        const todos = this.getLocalTodos();
-        const todoIndex = todos.findIndex(todo => todo.id === id);
-        if (todoIndex !== -1) {
-            todos[todoIndex].text = text;
-            localStorage.setItem('todos', JSON.stringify(todos));
+        try {
+            const todos = this.getLocalTodos();
+            const todoIndex = todos.findIndex(todo => todo.id == id);
+            if (todoIndex !== -1) {
+                todos[todoIndex].text = text;
+                localStorage.setItem('todo_app_tasks', JSON.stringify(todos));
+            }
+        } catch (error) {
+            console.error('Error editando en localStorage:', error);
         }
     }
     
     clearCompletedLocal() {
-        let todos = this.getLocalTodos();
-        todos = todos.filter(todo => !todo.completed);
-        localStorage.setItem('todos', JSON.stringify(todos));
+        try {
+            let todos = this.getLocalTodos();
+            todos = todos.filter(todo => !todo.completed);
+            localStorage.setItem('todo_app_tasks', JSON.stringify(todos));
+        } catch (error) {
+            console.error('Error limpiando localStorage:', error);
+        }
     }
     
     escapeHtml(text) {
@@ -448,7 +561,8 @@ class TodoApp {
     }
 }
 
-// Inicializar la aplicación cuando el DOM esté listo
+// Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Inicializando To-Do App...');
     new TodoApp();
 });
