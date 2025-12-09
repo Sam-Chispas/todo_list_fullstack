@@ -1,5 +1,4 @@
-create database todolist;
-use todolist;
+
 -- Crear tabla de tareas
 CREATE TABLE IF NOT EXISTS todos (
     id SERIAL PRIMARY KEY,
