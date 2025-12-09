@@ -23,7 +23,7 @@ const allowedOrigins = [
 
 // Configurar CORS
 const corsOptions = {
-    origin: function (origin, callback) {
+    origin: '*', function (origin, callback) {
         // Permitir requests sin origen
         if (!origin) return callback(null, true);
         

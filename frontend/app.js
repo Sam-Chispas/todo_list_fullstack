@@ -13,8 +13,8 @@ class TodoApp {
         if (isNetlify) {
             // En Netlify, usar proxy (configurado en netlify.toml)
             this.BACKEND_URL = '';  // Mismo dominio
-            this.API_URL = '/api/todos';
-            this.HEALTH_URL = '/api/health';
+            this.API_URL = 'https://todo-list-fullstack-1l3f.onrender.com/api/todos';
+            this.HEALTH_URL = 'https://todo-list-fullstack-1l3f.onrender.com/api/health';
             console.log('🌐 Modo: Netlify Production (usando proxy)');
         } else if (isLocal) {
             // Desarrollo local
