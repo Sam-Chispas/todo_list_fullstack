@@ -15,6 +15,18 @@ const pool = new Pool({
   }
 });
 
+let dbConnected = false;
+
+async function verifyDbConnection() {
+  try {
+    await pool.query('SELECT 1');
+    dbConnected = true;
+    console.log('Base de datos: Conectada');
+  } catch (err) {
+    dbConnected = false;
+    console.error('Error conectando a la base de datos:', err);
+  }
+}
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
@@ -153,8 +165,13 @@ app.get('*', (req, res) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en el puerto ${PORT}`);
-  console.log(`Modo: ${process.env.NODE_ENV || 'desarrollo'}`);
-  console.log(`Base de datos: ${process.env.DATABASE_URL ? 'Conectada' : 'No configurada'}`);
+verifyDbConnection().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor ejecutándose en el puerto ${PORT}`);
+    console.log(`Modo: ${process.env.NODE_ENV || 'desarrollo'}`);
+    console.log(`Base de datos: ${dbConnected ? 'Conectada' : 'No conectada'}`);
+    if (!dbConnected) {
+      console.error('ADVERTENCIA: La aplicación arrancó sin conexión a la base de datos. Revisa `DATABASE_URL` y permisos de red.');
+    }
+  });
 });
