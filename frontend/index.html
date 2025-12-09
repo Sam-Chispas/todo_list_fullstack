@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List Full Stack</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> Mi Lista de Tareas</h1>
+            <p class="subtitle">Organiza tus tareas diarias</p>
+        </header>
+
+        <main>
+            <div class="todo-wrapper">
+                <div class="todo-input-section">
+                    <input type="text" 
+                           id="new-todo" 
+                           placeholder="¿Qué necesitas hacer?" 
+                           autocomplete="off"
+                           maxlength="100">
+                    <button id="add-btn" class="btn-add">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+
+                <div class="todo-filters">
+                    <button class="filter-btn active" data-filter="all">Todas</button>
+                    <button class="filter-btn" data-filter="active">Pendientes</button>
+                    <button class="filter-btn" data-filter="completed">Completadas</button>
+                </div>
+
+                <div class="todo-stats">
+                    <span id="todo-count">0 tareas pendientes</span>
+                    <button id="clear-completed" class="btn-clear">
+                        <i class="fas fa-trash"></i> Limpiar completadas
+                    </button>
+                </div>
+
+                <ul id="todo-list"></ul>
+
+                <div class="empty-state" id="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No hay tareas</h3>
+                    <p>¡Agrega tu primera tarea para comenzar!</p>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> Instrucciones</h3>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Haz clic en una tarea para marcarla como completada</li>
+                    <li><i class="fas fa-edit"></i> Haz doble clic para editar una tarea</li>
+                    <li><i class="fas fa-trash"></i> Usa el botón <i class="fas fa-times"></i> para eliminar una tarea</li>
+                    <li><i class="fas fa-filter"></i> Filtra tareas usando los botones de arriba</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer>
+            <p>To-Do List Full Stack | Backend: 
+                <span id="backend-status" class="status-offline">
+                    <i class="fas fa-circle"></i> Desconectado
+                </span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal para edición -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-edit"></i> Editar Tarea</h3>
+            <input type="text" id="edit-todo-input" maxlength="100">
+            <div class="modal-actions">
+                <button id="cancel-edit" class="btn-secondary">Cancelar</button>
+                <button id="save-edit" class="btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
