@@ -4,7 +4,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://tu-backend-en-render.onrender.com/api/:splat"
+  to = "https://todo-list-fullstack-1l3f.onrender.com"
   status = 200
   force = true
 

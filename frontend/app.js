@@ -1,7 +1,7 @@
 class TodoApp {
     constructor() {
         // URL del backend en Render (la obtendrás después)
-        this.apiUrl = 'https://tu-backend-en-render.onrender.com/api/todos';
+        this.apiUrl = 'https://todo-list-fullstack-1l3f.onrender.com';
         
         // Fallback para desarrollo local
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
