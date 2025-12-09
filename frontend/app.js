@@ -1,8 +1,37 @@
 class TodoApp {
     constructor() {
-        // URL de tu backend en Render
-        this.BACKEND_URL = 'https://todo-list-fullstack-1l3f.onrender.com';
-        this.API_URL = `${this.BACKEND_URL}/api/todos`;
+        // DETECCIÓN AUTOMÁTICA DE ENTORNO
+        const isNetlify = window.location.hostname.includes('netlify.app');
+        const isLocal = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+        
+        console.log('📍 Detección de entorno:');
+        console.log('  Hostname:', window.location.hostname);
+        console.log('  Netlify?:', isNetlify);
+        console.log('  Local?:', isLocal);
+        
+        if (isNetlify) {
+            // En Netlify, usar proxy (configurado en netlify.toml)
+            this.BACKEND_URL = '';  // Mismo dominio
+            this.API_URL = '/api/todos';
+            this.HEALTH_URL = '/api/health';
+            console.log('🌐 Modo: Netlify Production (usando proxy)');
+        } else if (isLocal) {
+            // Desarrollo local
+            this.BACKEND_URL = 'http://localhost:10000';
+            this.API_URL = 'http://localhost:10000/api/todos';
+            this.HEALTH_URL = 'http://localhost:10000/api/health';
+            console.log('💻 Modo: Desarrollo Local');
+        } else {
+            // Otros casos (acceso directo a Render, etc.)
+            this.BACKEND_URL = 'https://todo-list-fullstack-1l3f.onrender.com';
+            this.API_URL = 'https://todo-list-fullstack-1l3f.onrender.com/api/todos';
+            this.HEALTH_URL = 'https://todo-list-fullstack-1l3f.onrender.com/api/health';
+            console.log('🔗 Modo: Conexión Directa a Render');
+        }
+        
+        console.log('🔗 URL API:', this.API_URL);
+        console.log('🏥 URL Health:', this.HEALTH_URL);
         
         this.currentFilter = 'all';
         this.editingTodoId = null;
@@ -62,13 +91,10 @@ class TodoApp {
     
     async checkBackendConnection() {
         console.log('🔍 Verificando conexión al backend...');
-        console.log('URL:', this.BACKEND_URL);
         
         try {
-            // Intentar conectar al endpoint de salud
-            const response = await fetch(`${this.BACKEND_URL}/health`, {
+            const response = await fetch(this.HEALTH_URL, {
                 method: 'GET',
-                mode: 'cors',
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -78,7 +104,7 @@ class TodoApp {
                 const data = await response.json();
                 console.log('✅ Backend conectado:', data);
                 
-                this.updateBackendStatus('connected', 'Conectado');
+                this.updateBackendStatus('connected', '✅ Conectado');
                 this.hideWarning();
                 return true;
             } else {
@@ -87,23 +113,24 @@ class TodoApp {
         } catch (error) {
             console.warn('⚠️ No se pudo conectar al backend:', error.message);
             
-            // Intentar conexión directa a la API
-            try {
-                const apiResponse = await fetch(this.API_URL, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if (apiResponse.ok) {
-                    this.updateBackendStatus('connected', 'Conectado (API)');
-                    this.hideWarning();
-                    return true;
+            // Si estamos en Netlify y el proxy falla, intentar directo
+            if (window.location.hostname.includes('netlify.app')) {
+                console.log('🔄 Proxy falló, intentando conexión directa...');
+                try {
+                    const directResponse = await fetch('https://todo-list-fullstack-1l3f.onrender.com/api/health');
+                    if (directResponse.ok) {
+                        this.updateBackendStatus('warning', '⚠️ Conexión directa (CORS puede fallar)');
+                        // Cambiar a conexión directa
+                        this.API_URL = 'https://todo-list-fullstack-1l3f.onrender.com/api/todos';
+                        this.HEALTH_URL = 'https://todo-list-fullstack-1l3f.onrender.com/api/health';
+                        return true;
+                    }
+                } catch (directError) {
+                    console.warn('Conexión directa también falló:', directError.message);
                 }
-            } catch (apiError) {
-                console.warn('⚠️ Conexión a API también falló:', apiError.message);
             }
             
-            this.updateBackendStatus('disconnected', 'Modo offline');
+            this.updateBackendStatus('disconnected', '🔴 Modo offline');
             this.showWarning();
             return false;
         }
@@ -134,12 +161,11 @@ class TodoApp {
     }
     
     async loadTodos() {
-        console.log('📥 Cargando tareas...');
+        console.log('📥 Cargando tareas desde:', this.API_URL);
         
         try {
             const response = await fetch(this.API_URL, {
                 method: 'GET',
-                mode: 'cors',
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -179,7 +205,6 @@ class TodoApp {
         try {
             const response = await fetch(this.API_URL, {
                 method: 'POST',
-                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -213,7 +238,6 @@ class TodoApp {
         try {
             const response = await fetch(`${this.API_URL}/${id}`, {
                 method: 'PATCH',
-                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -242,8 +266,7 @@ class TodoApp {
         
         try {
             const response = await fetch(`${this.API_URL}/${id}`, {
-                method: 'DELETE',
-                mode: 'cors'
+                method: 'DELETE'
             });
             
             if (response.ok) {
@@ -267,7 +290,6 @@ class TodoApp {
         try {
             const response = await fetch(`${this.API_URL}/${id}`, {
                 method: 'PATCH',
-                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -298,8 +320,7 @@ class TodoApp {
         
         try {
             const response = await fetch(`${this.API_URL}/clear-completed`, {
-                method: 'DELETE',
-                mode: 'cors'
+                method: 'DELETE'
             });
             
             if (response.ok) {
@@ -463,7 +484,9 @@ class TodoApp {
         try {
             const response = await fetch(this.API_URL, {
                 method: 'GET',
-                mode: 'cors'
+                headers: {
+                    'Accept': 'application/json'
+                }
             });
             
             if (response.ok) {

@@ -1,13 +1,23 @@
 [build]
   publish = "frontend"
-  command = "echo 'Building frontend for Netlify'"
+  command = "echo 'Netlify build completo'"
 
+# Proxy para API - Redirige /api/* a tu backend en Render
 [[redirects]]
   from = "/api/*"
-  to = "https://todo-list-fullstack-1l3f.onrender.com"
+  to = "https://todo-list-fullstack-1l3f.onrender.com/api/:splat"
   status = 200
   force = true
 
+# Headers para CORS
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PATCH, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, Accept, Origin"
+
+# Single Page App - Todas las rutas van a index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
