@@ -1,6 +1,13 @@
 class TodoApp {
     constructor() {
-        this.apiUrl = 'http://localhost:3000/api/todos';
+        // URL del backend en Render (la obtendrás después)
+        this.apiUrl = 'https://tu-backend-en-render.onrender.com/api/todos';
+        
+        // Fallback para desarrollo local
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            this.apiUrl = 'http://localhost:3000/api/todos';
+        }
+        
         this.currentFilter = 'all';
         this.editingTodoId = null;
         
@@ -8,12 +15,6 @@ class TodoApp {
         this.setupEventListeners();
         this.loadTodos();
         this.checkBackendConnection();
-        
-        // Configurar la URL de la API basada en el entorno
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            // En producción, usar la URL del backend desplegado
-            this.apiUrl = `${window.location.origin}/api/todos`;
-        }
     }
     
     initializeElements() {
@@ -66,20 +67,26 @@ class TodoApp {
     
     async checkBackendConnection() {
         try {
-            const response = await fetch(this.apiUrl);
+            const response = await fetch(this.apiUrl.replace('/api/todos', '/health'));
             if (response.ok) {
-                this.backendStatus.innerHTML = '<i class="fas fa-circle"></i> Conectado';
+                const data = await response.json();
+                this.backendStatus.innerHTML = `<i class="fas fa-circle"></i> ${data.status || 'Conectado'}`;
                 this.backendStatus.className = 'status-online';
             } else {
                 throw new Error('Backend no disponible');
             }
         } catch (error) {
+            console.warn('No se pudo conectar al backend:', error);
             this.backendStatus.innerHTML = '<i class="fas fa-circle"></i> Desconectado';
             this.backendStatus.className = 'status-offline';
-            console.warn('No se pudo conectar al backend. Los datos se guardarán localmente.');
+            
+            // Mostrar alerta amigable
+            if (!localStorage.getItem('backendWarningShown')) {
+                alert('⚠️ El backend está temporalmente fuera de línea. Las tareas se guardarán localmente hasta que se restablezca la conexión.');
+                localStorage.setItem('backendWarningShown', 'true');
+            }
         }
     }
-    
     async loadTodos() {
         try {
             const response = await fetch(this.apiUrl);
